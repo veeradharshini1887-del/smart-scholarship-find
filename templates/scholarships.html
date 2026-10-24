@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "_macros.html" import scholarship_card, deadline_alerts %}
+{% block title %}{{ 'Recommended Scholarships' if mode == 'recommend' else 'All Scholarships' }}{% endblock %}
+{% block content %}
+{% if mode == 'recommend' %}
+  <h1 class="h3">Scholarships recommended for you</h1>
+  <p class="text-muted">Sorted by match score, highest first. Hover over a criterion chip to see why it passed or failed.</p>
+  {% if summary %}
+  <div class="summary-row">
+    <div><strong>{{ summary.eligible }}</strong> fully eligible</div>
+    <div><strong>{{ summary.partial }}</strong> partially eligible</div>
+    <div><strong>{{ summary.amount|inr }}</strong> total value of eligible scholarships</div>
+  </div>
+  {% endif %}
+  {{ deadline_alerts(alerts) }}
+  <div class="filter-row">
+    <a class="filter-link {{ 'active' if show == 'relevant' }}" href="{{ url_for('recommendations') }}">Eligible and partial</a>
+    <a class="filter-link {{ 'active' if show == 'eligible' }}" href="{{ url_for('recommendations', show='eligible') }}">Eligible only</a>
+    <a class="filter-link {{ 'active' if show == 'all' }}" href="{{ url_for('recommendations', show='all') }}">All open scholarships</a>
+    <a class="ms-auto small" href="{{ url_for('profile') }}">Edit profile</a>
+  </div>
+{% else %}
+  <h1 class="h3">All scholarships</h1>
+  <form class="row g-2 mb-3" method="get" role="search">
+    <div class="col-sm-8 col-md-6"><input class="form-control" name="q" value="{{ q }}" placeholder="Search by name or eligibility" aria-label="Search scholarships"></div>
+    <div class="col-auto"><button class="btn btn-primary" type="submit">Search</button></div>
+    {% if not logged_in %}<div class="col-12 small text-muted">Log in and complete your profile to see match scores.</div>{% endif %}
+  </form>
+{% endif %}
+
+{% if items %}
+  <div class="row g-3">
+    {% for item in items %}
+      <div class="col-lg-6">{{ scholarship_card(item, applied_ids) }}</div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    {% if mode == 'recommend' %}
+      <h2 class="h5">No scholarships match right now</h2>
+      <p>Try &ldquo;All open scholarships&rdquo; to see partial matches, or update your profile if any detail is wrong.</p>
+    {% else %}
+      <h2 class="h5">No scholarships found</h2>
+      <p>Try a different search word.</p>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

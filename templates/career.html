@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Career Guidance{% endblock %}
+{% block content %}
+<h1 class="h3">Career guidance</h1>
+<p class="text-muted">Choose your degree and the field you are interested in. You will see higher studies, courses, job roles, skills, tools and a roadmap.</p>
+
+<form method="get" class="card-panel mb-4" id="careerForm">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label" for="degree">Your degree</label>
+      <select class="form-select" id="degree" name="degree" required>
+        <option value="">Choose degree</option>
+        {% for d in ai.DEGREES %}<option value="{{ d }}" {{ 'selected' if d == degree }}>{{ d }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-5">
+      <label class="form-label" for="interest">Field of interest</label>
+      <select class="form-select" id="interest" name="interest" required>
+        <option value="">Choose a field</option>
+        {% if suggestions %}
+        <optgroup label="Suggested for {{ degree }}">
+          {% for i in suggestions %}<option value="{{ i }}" {{ 'selected' if i == interest }}>{{ i }}</option>{% endfor %}
+        </optgroup>
+        <optgroup label="Other fields">
+          {% for i in others %}<option value="{{ i }}" {{ 'selected' if i == interest }}>{{ i }}</option>{% endfor %}
+        </optgroup>
+        {% else %}
+          {% for i in ai.CAREER_PATHS %}<option value="{{ i }}" {{ 'selected' if i == interest }}>{{ i }}</option>{% endfor %}
+        {% endif %}
+      </select>
+    </div>
+    <div class="col-md-3"><button class="btn btn-primary w-100" type="submit">Show guidance</button></div>
+  </div>
+</form>
+
+{% if plan %}
+  <div class="card-panel mb-4">
+    <h2 class="h5">Career roadmap: {{ plan.interest }}</h2>
+    <p class="mb-3">{{ plan.summary }}</p>
+    <div class="roadmap">
+      {% for step in plan.roadmap %}
+        <div class="road-step {{ 'first' if loop.first }}">{{ step }}</div>
+        {% if not loop.last %}<div class="road-arrow" aria-hidden="true">&darr;</div>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6"><div class="card-panel h-100"><h3 class="h6">Possible higher studies</h3><ul class="mb-0">{% for x in plan.higher_studies %}<li>{{ x }}</li>{% endfor %}</ul></div></div>
+    <div class="col-md-6"><div class="card-panel h-100"><h3 class="h6">Suitable courses</h3><ul class="mb-0">{% for x in plan.courses %}<li>{{ x }}</li>{% endfor %}</ul></div></div>
+    <div class="col-md-6"><div class="card-panel h-100"><h3 class="h6">Possible job roles</h3><ul class="mb-0">{% for x in plan.jobs %}<li>{{ x }}</li>{% endfor %}</ul></div></div>
+    <div class="col-md-6"><div class="card-panel h-100"><h3 class="h6">Required skills</h3>{% for x in plan.skills %}<span class="chip">{{ x }}</span>{% endfor %}</div></div>
+    <div class="col-12"><div class="card-panel"><h3 class="h6">Suggested technologies and tools</h3>{% for x in plan.technologies %}<span class="chip">{{ x }}</span>{% endfor %}</div></div>
+  </div>
+  <p class="small text-muted mt-3">This guidance is general and built into the system. Check entrance exam dates and college requirements before you decide.</p>
+{% else %}
+  <div class="empty-state"><h2 class="h5">Pick a degree and a field to begin</h2><p>Your roadmap will appear here.</p></div>
+{% endif %}
+{% endblock %}

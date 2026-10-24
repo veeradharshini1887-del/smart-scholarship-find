@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ring %}
+{% block title %}{{ s.scholarship_name }}{% endblock %}
+{% block content %}
+{% set left = s.last_date|days_left %}
+<nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('scholarships') }}">Scholarships</a></li><li class="breadcrumb-item active">Details</li></ol></nav>
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card-panel">
+      <div class="d-flex justify-content-between gap-3">
+        <div>
+          <h1 class="h3 mb-1">{{ s.scholarship_name }}</h1>
+          {% if s.is_demo %}<span class="badge-demo">Demo data &ndash; not a verified scholarship</span>{% endif %}
+        </div>
+        {% if m %}{{ ring(m.percentage) }}{% endif %}
+      </div>
+      <div class="amount my-3">{{ s.amount|inr }}</div>
+      <p>{{ s.eligibility }}</p>
+      <dl class="detail-grid">
+        <dt>Minimum CGPA</dt><dd>{{ ('%.2f' % s.minimum_cgpa) if s.minimum_cgpa else 'No minimum' }}</dd>
+        <dt>Maximum family income</dt><dd>{{ s.maximum_income|inr if s.maximum_income else 'No limit' }}</dd>
+        <dt>Degree</dt><dd>{{ 'All degrees' if s.degree|upper == 'ALL' else s.degree.replace(',', ', ') }}</dd>
+        <dt>Community</dt><dd>{{ 'All communities' if s.community|upper == 'ALL' else s.community.replace(',', ', ') }}</dd>
+        <dt>Gender</dt><dd>{{ s.gender }}</dd>
+        <dt>State</dt><dd>{{ 'All states' if s.state|upper == 'ALL' else s.state.replace(',', ', ') }}</dd>
+        <dt>Required documents</dt><dd>{% for d in s.required_documents|split_list %}<span class="chip">{{ d }}</span>{% endfor %}</dd>
+        <dt>Last date</dt><dd class="{{ 'text-danger' if left < 0 }}">{{ s.last_date|dmy }} ({{ s.last_date|deadline_text }})</dd>
+        {% if s.official_link %}<dt>Official link</dt><dd><a href="{{ s.official_link }}" target="_blank" rel="noopener noreferrer">{{ s.official_link }}</a></dd>{% endif %}
+      </dl>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-panel">
+      <h2 class="h5">Your eligibility</h2>
+      {% if m %}
+        <p><span class="match-status ms-{{ m.status_class }}">{{ m.status }}</span> &nbsp;Score {{ m.score }} / 100</p>
+        <table class="table table-sm criteria-table">
+          <thead><tr><th>Criterion</th><th>Result</th><th class="text-end">Points</th></tr></thead>
+          <tbody>
+          {% for c in m.criteria %}
+            <tr class="{{ 'row-ok' if c.passed else 'row-no' }}">
+              <td>{{ c.label }}<div class="small text-muted">{{ c.detail }}</div></td>
+              <td>{{ 'Met' if c.passed else 'Not met' }}</td>
+              <td class="text-end">{{ c.earned }} / {{ c.points }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        <h3 class="h6 mt-3">Documents</h3>
+        <ul class="list-unstyled doc-status">
+          {% for d in docs_status %}<li class="{{ 'ok' if d.uploaded else 'no' }}"><span class="mk">{{ '&#10003;'|safe if d.uploaded else '&#10007;'|safe }}</span> {{ d.label }}
+            {% if not d.uploaded %}<a href="{{ url_for('upload_document') }}">upload</a>{% endif %}</li>{% endfor %}
+        </ul>
+      {% elif needs_profile %}
+        <p>Complete your profile to see whether you are eligible.</p>
+        <a class="btn btn-primary btn-sm" href="{{ url_for('profile') }}">Complete profile</a>
+      {% elif not logged_in %}
+        <p>Log in to check your eligibility for this scholarship.</p>
+        <a class="btn btn-primary btn-sm" href="{{ url_for('login', next=request.path) }}">Log in</a>
+      {% endif %}
+
+      <div class="mt-3 d-flex gap-2">
+        {% if applied %}
+          <span class="btn btn-success disabled">Applied</span>
+          <a class="btn btn-outline-primary" href="{{ url_for('tracking') }}">Track application</a>
+        {% elif left < 0 %}
+          <span class="btn btn-secondary disabled">Closed</span>
+        {% else %}
+          <a class="btn btn-primary" href="{{ url_for('apply', scholarship_id=s.scholarship_id) }}">Apply Now</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

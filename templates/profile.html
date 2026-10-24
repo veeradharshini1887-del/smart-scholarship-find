@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Student Profile{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h1 class="h3">Student profile</h1>
+    <p class="text-muted">These details are used to match you with scholarships. Family income means total annual income in rupees.</p>
+
+    <div class="flow flow-compact mb-4">
+      <div class="flow-step"><strong>Student details</strong></div><div class="flow-arrow" aria-hidden="true">&rarr;</div>
+      <div class="flow-step"><strong>AI analysis</strong></div><div class="flow-arrow" aria-hidden="true">&rarr;</div>
+      <div class="flow-step"><strong>Eligibility check</strong></div><div class="flow-arrow" aria-hidden="true">&rarr;</div>
+      <div class="flow-step"><strong>Recommended scholarships</strong></div>
+    </div>
+
+    <form method="post" class="needs-validation card-panel" novalidate>
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="name">Student name</label>
+          <input class="form-control" id="name" name="name" value="{{ student.name or '' }}" required minlength="2" maxlength="100">
+          <div class="invalid-feedback">Enter your name.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="college">College name</label>
+          <input class="form-control" id="college" name="college" value="{{ student.college or '' }}" required minlength="2" maxlength="150">
+          <div class="invalid-feedback">Enter your college name.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="degree">Degree</label>
+          <select class="form-select" id="degree" name="degree" required>
+            <option value="">Choose degree</option>
+            <optgroup label="Undergraduate">{% for d in ai.UG_DEGREES %}<option value="{{ d }}" {{ 'selected' if student.degree == d }}>{{ d }}</option>{% endfor %}</optgroup>
+            <optgroup label="Postgraduate">{% for d in ai.PG_DEGREES %}<option value="{{ d }}" {{ 'selected' if student.degree == d }}>{{ d }}</option>{% endfor %}</optgroup>
+          </select>
+          <div class="invalid-feedback">Choose your degree.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="cgpa">CGPA (out of 10)</label>
+          <input class="form-control" type="number" id="cgpa" name="cgpa" step="0.01" min="0" max="10" value="{{ student.cgpa if student.cgpa is not none else '' }}" required>
+          <div class="invalid-feedback">Enter a CGPA between 0 and 10.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="family_income">Family income (per year, &#8377;)</label>
+          <input class="form-control" type="number" id="family_income" name="family_income" min="0" step="1000" value="{{ student.family_income|int if student.family_income is not none else '' }}" required>
+          <div class="invalid-feedback">Enter your annual family income.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="community">Community</label>
+          <select class="form-select" id="community" name="community" required>
+            <option value="">Choose community</option>
+            {% for c in ai.COMMUNITIES %}<option value="{{ c }}" {{ 'selected' if student.community == c }}>{{ c }}</option>{% endfor %}
+          </select>
+          <div class="invalid-feedback">Choose your community.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="gender">Gender</label>
+          <select class="form-select" id="gender" name="gender" required>
+            <option value="">Choose gender</option>
+            {% for g in ai.GENDERS %}<option value="{{ g }}" {{ 'selected' if student.gender == g }}>{{ g }}</option>{% endfor %}
+          </select>
+          <div class="invalid-feedback">Choose your gender.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="state">State</label>
+          <select class="form-select" id="state" name="state" required>
+            <option value="">Choose state</option>
+            {% for st in ai.STATES %}<option value="{{ st }}" {{ 'selected' if student.state == st }}>{{ st }}</option>{% endfor %}
+          </select>
+          <div class="invalid-feedback">Choose your state.</div>
+        </div>
+      </div>
+      <button class="btn btn-primary mt-4" type="submit">Save profile and find scholarships</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

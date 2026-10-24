@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ring %}
+{% block title %}Apply: {{ s.scholarship_name }}{% endblock %}
+{% block content %}
+{% set m = checks.match %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h1 class="h3">Scholarship application</h1>
+    <div class="card-panel mb-3">
+      <div class="d-flex justify-content-between gap-3">
+        <div>
+          <h2 class="h5 mb-1">{{ s.scholarship_name }}</h2>
+          {% if s.is_demo %}<span class="badge-demo">Demo data</span>{% endif %}
+          <div class="amount mt-2">{{ s.amount|inr }}</div>
+          <div class="small text-muted">Last date: {{ s.last_date|dmy }} ({{ s.last_date|deadline_text }})</div>
+        </div>
+        {% if m %}{{ ring(m.percentage) }}{% endif %}
+      </div>
+    </div>
+
+    <div class="card-panel mb-3">
+      <h2 class="h6">Step 1 &ndash; Eligibility check</h2>
+      {% if m %}
+        <ul class="list-unstyled doc-status mb-0">
+          {% for c in m.criteria %}<li class="{{ 'ok' if c.passed else 'no' }}"><span class="mk">{{ '&#10003;'|safe if c.passed else '&#10007;'|safe }}</span> <strong>{{ c.label }}</strong> &ndash; {{ c.detail }}</li>{% endfor %}
+        </ul>
+      {% else %}
+        <p class="mb-0">Your profile is incomplete. <a href="{{ url_for('profile') }}">Complete it</a> to check eligibility.</p>
+      {% endif %}
+    </div>
+
+    <div class="card-panel mb-3">
+      <h2 class="h6">Step 2 &ndash; Required documents</h2>
+      <ul class="list-unstyled doc-status mb-2">
+        {% for d in checks.docs %}<li class="{{ 'ok' if d.uploaded else 'no' }}"><span class="mk">{{ '&#10003;'|safe if d.uploaded else '&#10007;'|safe }}</span> {{ d.label }} &ndash; {{ 'uploaded' if d.uploaded else 'missing' }}</li>{% endfor %}
+      </ul>
+      {% if checks.docs|selectattr('uploaded', 'equalto', false)|list %}
+        <a class="btn btn-outline-primary btn-sm" href="{{ url_for('upload_document') }}">Upload missing documents</a>
+      {% endif %}
+    </div>
+
+    <div class="card-panel">
+      <h2 class="h6">Step 3 &ndash; Submit</h2>
+      {% if checks.already %}
+        <p class="mb-2">You have already applied for this scholarship.</p>
+        <a class="btn btn-outline-primary" href="{{ url_for('tracking') }}">Track application</a>
+      {% elif checks.problems %}
+        <div class="alert alert-warning mb-0">
+          <strong>You cannot submit yet:</strong>
+          <ul class="mb-0">{% for p in checks.problems %}<li>{{ p }}</li>{% endfor %}</ul>
+        </div>
+      {% else %}
+        <p>Everything is in order. Submitting will record your application with status <strong>Submitted</strong> and today&rsquo;s date.</p>
+        <form method="post">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button class="btn btn-primary" type="submit">Submit application</button>
+          <a class="btn btn-link" href="{{ url_for('scholarship_details', scholarship_id=s.scholarship_id) }}">Cancel</a>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

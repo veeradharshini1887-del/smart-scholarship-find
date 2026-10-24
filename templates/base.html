@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}Home{% endblock %} | Smart Scholarship Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg site-nav">
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('index') }}">
+      <span class="brand-mark" aria-hidden="true">SS</span> Smart Scholarship Finder
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint == 'index' }}" href="{{ url_for('index') }}">Home</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint in ('recommendations','scholarships','scholarship_details') }}" href="{{ url_for('recommendations') }}">Find Scholarships</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint == 'career_guidance' }}" href="{{ url_for('career_guidance') }}">Career Guidance</a></li>
+        {% if logged_in %}
+        <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint == 'tracking' }}" href="{{ url_for('tracking') }}">My Applications</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint == 'upload_document' }}" href="{{ url_for('upload_document') }}">Documents</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint == 'profile' }}" href="{{ url_for('profile') }}">Profile</a></li>
+        {% endif %}
+      </ul>
+      <div class="d-flex align-items-center gap-2">
+        {% if logged_in %}
+          <span class="nav-user">{{ student_name }}</span>
+          <form method="post" action="{{ url_for('logout') }}" class="m-0">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <button class="btn btn-outline-primary btn-sm" type="submit">Log out</button>
+          </form>
+        {% else %}
+          <a class="btn btn-outline-primary btn-sm" href="{{ url_for('login') }}">Login</a>
+          <a class="btn btn-primary btn-sm" href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="container d-flex flex-wrap justify-content-between gap-2">
+    <span>Smart Scholarship Finder &amp; Career Guidance System &ndash; final year project.</span>
+    <span>Scholarships marked <span class="badge-demo">Demo data</span> are samples, not verified offers.
+      <a href="{{ url_for('admin_login') }}">Admin</a></span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

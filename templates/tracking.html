@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge %}
+{% block title %}My Applications{% endblock %}
+{% block content %}
+<h1 class="h3">My applications</h1>
+<div class="summary-row">
+  {% for st in statuses %}<div><strong>{{ counts[st] }}</strong> {{ st }}</div>{% endfor %}
+</div>
+{% if applications %}
+  <div class="table-responsive card-panel p-0">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>Scholarship</th><th>Amount</th><th>Applied date</th><th>Status</th><th>Progress</th></tr></thead>
+      <tbody>
+      {% for a in applications %}
+        <tr>
+          <td><a href="{{ url_for('scholarship_details', scholarship_id=a.scholarship_id) }}">{{ a.scholarship_name }}</a>
+            {% if a.is_demo %}<span class="badge-demo">Demo</span>{% endif %}</td>
+          <td>{{ a.amount|inr }}</td>
+          <td>{{ a.applied_date|dmy }}</td>
+          <td>{{ status_badge(a.application_status) }}</td>
+          <td style="min-width:210px">
+            {% set stage = {'Submitted':1,'Under Review':2,'Approved':3,'Rejected':3}[a.application_status] %}
+            <div class="progress-steps">
+              <span class="ps {{ 'done' if stage >= 1 }}">Submitted</span>
+              <span class="ps {{ 'done' if stage >= 2 }}">Review</span>
+              <span class="ps {{ ('done ' ~ ('bad' if a.application_status == 'Rejected' else 'good')) if stage >= 3 }}">{{ 'Rejected' if a.application_status == 'Rejected' else 'Approved' }}</span>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty-state">
+    <h2 class="h5">You have not applied to any scholarship yet</h2>
+    <p>Check which scholarships match your profile, then apply.</p>
+    <a class="btn btn-primary" href="{{ url_for('recommendations') }}">Find scholarships</a>
+  </div>
+{% endif %}
+{% endblock %}

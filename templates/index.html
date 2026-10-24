@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from "_macros.html" import deadline_alerts %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="row align-items-center g-4 g-lg-5">
+    <div class="col-lg-7">
+      <h1>Smart Scholarship Finder &amp; Career Guidance System</h1>
+      <p class="hero-sub">Find suitable scholarships and build your career with AI-powered guidance.</p>
+      <div class="d-flex flex-wrap gap-2 mt-4">
+        {% if logged_in %}
+          <a class="btn btn-primary btn-lg" href="{{ url_for('profile') }}">Get Started</a>
+        {% else %}
+          <a class="btn btn-primary btn-lg" href="{{ url_for('register') }}">Get Started</a>
+        {% endif %}
+        <a class="btn btn-outline-primary btn-lg" href="{{ url_for('recommendations') }}">Find Scholarships</a>
+        <a class="btn btn-outline-primary btn-lg" href="{{ url_for('career_guidance') }}">Career Guidance</a>
+        {% if logged_in %}
+          <a class="btn btn-link btn-lg" href="{{ url_for('tracking') }}">My Applications</a>
+        {% else %}
+          <a class="btn btn-link btn-lg" href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="sample-card" aria-label="Example of a scholarship match">
+        <div class="sample-top">
+          <div>
+            <div class="sample-name">Example: a scholarship checked against a profile</div>
+            <div class="amount">&#8377;30,000</div>
+          </div>
+          <div class="ring ring-high" style="--p: 90"><span>90%</span></div>
+        </div>
+        <ul class="sample-list">
+          <li class="ok"><span>CGPA 7.8 &ge; 6.0 required</span><b>+20</b></li>
+          <li class="ok"><span>Income &#8377;2,10,000 &le; &#8377;2,50,000</span><b>+25</b></li>
+          <li class="ok"><span>Degree B.E. accepted</span><b>+15</b></li>
+          <li class="ok"><span>Community SC accepted</span><b>+20</b></li>
+          <li class="ok"><span>Open to all genders</span><b>+10</b></li>
+          <li class="no"><span>State: Kerala only, student is from Tamil Nadu</span><b>+0</b></li>
+        </ul>
+        <div class="sample-foot">Every recommendation shows its score like this, so you can see why it matched.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{ deadline_alerts(deadlines) }}
+
+<section class="mt-5">
+  <h2 class="h4 mb-3">How it works</h2>
+  <div class="flow">
+    <div class="flow-step"><strong>Student details</strong><span>Enter degree, CGPA, income, community, gender and state.</span></div>
+    <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+    <div class="flow-step"><strong>AI analysis</strong><span>Each scholarship is scored out of 100 against your profile.</span></div>
+    <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+    <div class="flow-step"><strong>Eligibility check</strong><span>Criteria that pass or fail are listed clearly.</span></div>
+    <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+    <div class="flow-step"><strong>Apply and track</strong><span>Upload documents, apply, and follow your application status.</span></div>
+  </div>
+</section>
+
+<section class="mt-5 demo-note">
+  <strong>Demo data notice.</strong> The scholarships in this build are sample records created for testing.
+  The admin can replace them with verified scholarship information from the Admin Dashboard.
+</section>
+{% endblock %}

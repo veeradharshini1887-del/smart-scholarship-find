@@ -1,0 +1,74 @@
+{# Shared building blocks: match ring, status badge, scholarship card, deadline alerts #}
+
+{% macro ring(pct) %}
+  {% set tone = 'high' if pct >= 85 else ('mid' if pct >= 60 else 'low') %}
+  <div class="ring ring-{{ tone }}" style="--p: {{ pct }}" role="img" aria-label="{{ pct }} percent match">
+    <span>{{ pct }}%</span>
+  </div>
+{% endmacro %}
+
+{% macro status_badge(status) %}
+  {% set cls = {'Submitted':'st-submitted','Under Review':'st-review','Approved':'st-approved','Rejected':'st-rejected'}.get(status, 'st-submitted') %}
+  <span class="status-pill {{ cls }}">{{ status }}</span>
+{% endmacro %}
+
+{% macro criteria_chips(m) %}
+  <div class="crit-row">
+    {% for c in m.criteria %}
+      <span class="crit {{ 'ok' if c.passed else 'no' }}" title="{{ c.detail }}">{{ '&#10003;'|safe if c.passed else '&#10007;'|safe }} {{ c.label }}</span>
+    {% endfor %}
+  </div>
+{% endmacro %}
+
+{% macro scholarship_card(item, applied_ids) %}
+  {% set s = item.s %}{% set m = item.m %}
+  {% set left = s.last_date|days_left %}
+  <article class="sch-card {{ 'is-closed' if left < 0 }}">
+    <div class="sch-head">
+      <div class="sch-title">
+        <h3><a href="{{ url_for('scholarship_details', scholarship_id=s.scholarship_id) }}">{{ s.scholarship_name }}</a></h3>
+        {% if s.is_demo %}<span class="badge-demo">Demo data</span>{% endif %}
+        {% if m %}<span class="match-status ms-{{ m.status_class }}">{{ m.status }}</span>{% endif %}
+      </div>
+      {% if m %}{{ ring(m.percentage) }}{% endif %}
+    </div>
+    <div class="amount">{{ s.amount|inr }}</div>
+    <p class="elig">{{ s.eligibility }}</p>
+    {% if m %}{{ criteria_chips(m) }}{% endif %}
+    <div class="doc-row"><span class="meta-label">Documents</span>
+      {% for d in s.required_documents|split_list %}<span class="chip">{{ d }}</span>{% endfor %}
+    </div>
+    <div class="deadline-row {{ 'urgent' if 0 <= left <= 7 }} {{ 'closed' if left < 0 }}">
+      <span class="meta-label">Last date</span> {{ s.last_date|dmy }} <span class="days">({{ s.last_date|deadline_text }})</span>
+    </div>
+    <div class="sch-actions">
+      <a class="btn btn-outline-primary btn-sm" href="{{ url_for('scholarship_details', scholarship_id=s.scholarship_id) }}">View Details</a>
+      {% if s.scholarship_id in applied_ids %}
+        <span class="btn btn-success btn-sm disabled">Applied</span>
+      {% elif left < 0 %}
+        <span class="btn btn-secondary btn-sm disabled">Closed</span>
+      {% elif m and not m.is_eligible %}
+        <span class="btn btn-secondary btn-sm disabled">Not eligible</span>
+      {% else %}
+        <a class="btn btn-primary btn-sm" href="{{ url_for('apply', scholarship_id=s.scholarship_id) }}">Apply Now</a>
+      {% endif %}
+    </div>
+  </article>
+{% endmacro %}
+
+{% macro deadline_alerts(alerts) %}
+  {% if alerts %}
+  <section class="deadline-box" aria-label="Deadline reminder">
+    <h2 class="h5">&#9888; Deadline Reminder</h2>
+    <ul class="list-unstyled mb-0">
+      {% for a in alerts %}
+        <li class="{{ 'urgent' if a.urgent }}">
+          <a href="{{ url_for('scholarship_details', scholarship_id=a.s.scholarship_id) }}">{{ a.s.scholarship_name }}</a>
+          <span class="d-block d-sm-inline">Last Date: {{ a.s.last_date|dmy }}
+            <strong>({{ 'today' if a.days_left == 0 else (a.days_left ~ ' day' ~ ('' if a.days_left == 1 else 's') ~ ' left') }})</strong></span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+{% endmacro %}

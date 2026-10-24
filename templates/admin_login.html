@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Admin Login{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1 class="h3">Admin login</h1>
+  <form method="post" class="needs-validation card-panel" novalidate>
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <div class="mb-3">
+      <label class="form-label" for="username">Username</label>
+      <input class="form-control" id="username" name="username" required autocomplete="username">
+      <div class="invalid-feedback">Enter the admin username.</div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="password">Password</label>
+      <input class="form-control" type="password" id="password" name="password" required autocomplete="current-password">
+      <div class="invalid-feedback">Enter the admin password.</div>
+    </div>
+    <button class="btn btn-primary w-100" type="submit">Log in as admin</button>
+  </form>
+  <p class="small text-muted mt-3">The admin account is created from the values in your <code>.env</code> file when the server starts.</p>
+</div>
+{% endblock %}
